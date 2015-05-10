@@ -25,6 +25,10 @@ io.on('connection', function(socket){
     socket.broadcast.emit('user typing', user);
   });
 
+  socket.on('user not typing', function(user) {
+    socket.broadcast.emit('user not typing', user);
+  });
+
 });
 
 http.listen(3000, function() {

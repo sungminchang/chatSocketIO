@@ -15,7 +15,7 @@
   </head>
   <body>
     <ul id="messages"></ul>
-      <input id="name" autocomplete="off" />
+      <input id="user" autocomplete="off" />
     <form action="">
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
@@ -27,6 +27,7 @@
         var user = $('#user').val();
         var msg = $('#m').val();
 
+
         socket.emit('chat message', msg, user);
 
         $('#messages').append($('<li>').text(user + ': ' + msg));
@@ -36,16 +37,44 @@
         return false;
       });
 
-      $('form').keypress(function() {
-        socket.emit('user typing', $('#user').val());
+      // $('form').keypress(function() {
+      //   socket.emit('user typing', $('#user').val());
+      // });
+
+      $('form').keyup(function() {
+        console.log('detecting a keypress in the form');
+        if ($('form input').val().length > 0) {
+          socket.emit('user typing', $('#user').val());
+        } else {
+          socket.emit('user not typing', $('#user').val());
+        }
       });
+
+
+      // if form is in focus
+      // if there is a value to text field
+      // $('form').on('focusin'(function() {
+      //   ($('form').onkeypress
+      //   socket.emit('user typing', $('#user').val());
+      // });
+      // send user is typing event
+      // anytime the form comes back in focus,
+        // and  there is a keypress
+        // detect whether any letters remain
+        // if no letters remain
+          // send an event to say user is not typing
 
       socket.on('chat message', function(msg, user) {
         $('#messages').append($('<li>').text(user + ': ' + msg));
       });
 
       socket.on('user typing', function(user) {
-        $('#messages').prepend($('<li>').text(user, ' is typing '));
+        $('#messages').prepend($('<li>').text(user + ' is typing').attr('class', user + '-typing-status'));
+      });
+
+      socket.on('user not typing', function(user) {
+        console.log(user);
+        $('.' + user + '-typing-status').remove();
       });
 
       socket.on('user connected', function() {

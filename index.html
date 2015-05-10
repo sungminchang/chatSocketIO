@@ -23,6 +23,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script>
       var socket = io();
+      var sentTypingStatus = false;
+
       $('form').submit(function() {
         var user = $('#user').val();
         var msg = $('#m').val();
@@ -43,9 +45,12 @@
 
       $('form').keyup(function() {
         console.log('detecting a keypress in the form');
-        if ($('form input').val().length > 0) {
+        var message = $('form input').val().length > 0
+        if (!sentTypingStatus && message) {
           socket.emit('user typing', $('#user').val());
-        } else {
+          sentTypingStatus = true;
+        } else if (sentTypingStatus && !message) {
+          sentTypingStatus = false; 
           socket.emit('user not typing', $('#user').val());
         }
       });
@@ -69,12 +74,12 @@
       });
 
       socket.on('user typing', function(user) {
-        $('#messages').prepend($('<li>').text(user + ' is typing').attr('class', user + '-typing-status'));
+        $('#messages').prepend($('<li>').text(user + ' is typing').attr({'class': 'typing-status', 'id': user}));
       });
 
       socket.on('user not typing', function(user) {
         console.log(user);
-        $('.' + user + '-typing-status').remove();
+        $('li[class=typing-status][id=' + user + ']').remove();
       });
 
       socket.on('user connected', function() {

@@ -86,8 +86,9 @@
         console.log('user connected');
       });
 
-      socket.on('user disconnected', function() {
-        console.log('user disconnected');
+      socket.on('user disconnected', function(user) {
+        console.log('user disconnected: ', user);
+        $('li[class=typing-status][id=' + user + ']').remove();
       });
 
 

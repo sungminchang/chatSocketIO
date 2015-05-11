@@ -1,10 +1,12 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var clients = {};
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/index.html');
 });
+
 
 io.on('connection', function(socket){
   console.log('a user connected');
@@ -13,7 +15,10 @@ io.on('connection', function(socket){
 
   socket.on('disconnect', function() {
     console.log('user disconnected');
-    io.emit('user disconnected');
+    var user = clients[socket];
+    io.emit('user disconnected', user);
+    delete clients[socket];
+    
   });
 
   socket.on('chat message', function(msg, user) {
@@ -22,6 +27,7 @@ io.on('connection', function(socket){
   });
 
   socket.on('user typing', function(user) {
+    clients[socket] = user;
     socket.broadcast.emit('user typing', user);
   });
 
